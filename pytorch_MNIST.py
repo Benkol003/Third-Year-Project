@@ -3,22 +3,16 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-import snntorch as snn
-from snntorch import utils
-from snntorch import spikegen
-import snntorch.spikeplot as splt
-from snntorch import surrogate
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 dtype=torch.float
-print("Feedforward SNN Trained on MNIST")
+print("Feedforward ANN Trained on MNIST")
 
 # setting device on GPU if available, else CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('Using device:', device)
+
 
 # Training Parameters
 batch_size=256
@@ -45,81 +39,49 @@ mnist_test = datasets.MNIST(data_path, train=False, download=True, transform=tra
 train_loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True,drop_last=True)
 test_loader = DataLoader(mnist_test, batch_size=batch_size, shuffle=True,drop_last=True)
 
-################ MNIST Model ##############################################################
+############ MNIST Model ################################
 
 # layer parameters
 num_inputs = 28*28
 num_hidden1 = 200
 num_hidden2 = 50
 num_outputs = 10
-num_steps = 26  # for spike encoding
-beta = 0.95 #leak rate
-lr=5e-5
+
+lr=1e-2 #TODO learning rate does not directly translate from the SNN model due to the iteration steps for producing spikes
 weight_decay=1e-6
 
-spike_grad1 = surrogate.atan() 
 
 class Net(nn.Module):
 
     def __init__(self):
         super().__init__()
-        
-
-
-        # initialize layers
-        #TODO can we use nn.sequential
-
-        #spike encoding at input layer
-
         self.fc1 = nn.Linear(num_inputs, num_hidden1)
-        self.lif1 = snn.Leaky(beta=beta,spike_grad=spike_grad1)
+        self.n1 = nn.ReLU()
+        self.fc2 = nn.Linear(num_hidden1, num_hidden2)
+        self.n2 = nn.ReLU()
+        self.fc3 = nn.Linear(num_hidden2, num_outputs)
 
-        self.fc2 = nn.Linear(num_hidden1,num_hidden2)
-        self.lif2 = snn.Leaky(beta=beta, spike_grad=spike_grad1)
+    def forward(self,x):
+        x = self.fc1(x)
+        x = self.n1(x)
+        x = self.fc2(x)
+        x = self.n2(x)
+        x = self.fc3(x)
 
-        self.fc3 = nn.Linear(num_hidden2,num_outputs)
-        self.lif3 = snn.Leaky(beta=beta, spike_grad=spike_grad1)
+        return x
 
-        #pytorch creates the tensors to represent the network layout and weights for each layer; snntorch provides the model that operates on the entire tensor (at each layer).
 
-  
-    def forward(self,x): #x is input data
-
-        x_spk = spikegen.rate(x,num_steps=num_steps) 
-        # Initialize hidden states
-        mem1 = self.lif1.init_leaky()
-        mem2 = self.lif2.init_leaky()
-        mem3 = self.lif2.init_leaky()
-
-        # record outputs
-        mem3_rec = []
-        spk3_rec = []
-
-        for step in range(num_steps):
-            #cur1 = self.fc1(x_spk[step])
-            cur1 = self.fc1(x) #for non-encoded input
-            spk1, mem1 = self.lif1(cur1, mem1)
-
-            cur2 = self.fc2(spk1)
-            spk2, mem2 = self.lif2(cur2, mem2)
-
-            cur3 = self.fc3(spk2)
-            spk3, mem3 = self.lif3(cur3, mem3)
-
-            spk3_rec.append(spk3)
-            mem3_rec.append(mem3)
-
-        return torch.stack(spk3_rec, dim=0), torch.stack(mem3_rec, dim=0)
     
-###################################################################################
+
 
 ########### STATS ##############
 
 def print_batch_accuracy(data, targets, train=False):
-    output, _ = net(data.view(batch_size, -1))
-    _, idx = output.sum(dim=0).max(1)
-    acc = np.mean((targets == idx).detach().cpu().numpy())
-    dev = np.std((targets == idx).detach().cpu().numpy())
+    logits = net(data.view(batch_size, -1))
+    pred_probab = nn.Softmax(dim=1)(logits)
+    pred = pred_probab.argmax(1)
+    acc = np.mean((targets == pred).detach().cpu().numpy())
+    dev = np.std((targets == pred).detach().cpu().numpy())
     if train:
         print(f"Train set accuracy for a single minibatch: {acc*100:.2f}%")
         print(f"Train set deviation for a single minibatch: {dev*100:.2f}%")
@@ -138,13 +100,9 @@ def train_printer():
 
 ##############################
 
-
-# Load the network onto CUDA
 net = Net().to(device)
-
 loss = nn.CrossEntropyLoss()
 optimiser = torch.optim.SGD(net.parameters(),lr=lr, momentum=0.9, weight_decay=weight_decay)
-
 
 num_epochs = 4
 loss_hist = []
@@ -159,26 +117,23 @@ for epoch in range(num_epochs):
     train_batches = iter(train_loader)
 
     #mini-batch loop
-    for data, targets in train_batches: #torch.Size([128, 1, 28, 28]), torch.Size([128])
+    for data, targets in train_batches: #torch.Size([256, 1, 28, 28]), torch.Size([256])
 
         data = data.to(device)
         targets = targets.to(device)
 
         # forward pass
         net.train() #inform pytorch
-        spk_rec, mem_rec = net(data.view(batch_size, -1))
+        logits = net(data.view(batch_size, -1)) #torch.Size([256, 10])
 
-        #calculate loss
-        loss_val = torch.zeros((1), dtype=dtype, device=device) 
-        for step in range(num_steps):
-            loss_val += loss(mem_rec[step], targets)
-
+        loss_val = loss(logits, targets)
 
         optimiser.zero_grad() #(reset for batch)
         loss_val.backward() #calculate backpropogation error gradient
         optimiser.step() #then update parameters
 
         # Store loss history for future plotting
+        
         loss_hist.append(loss_val.item())
 
         # Test set
@@ -190,12 +145,11 @@ for epoch in range(num_epochs):
             test_targets = test_targets.to(device)
 
             # Test set forward pass
-            test_spk, test_mem = net(test_data.view(batch_size, -1))
+            logits = net(test_data.view(batch_size, -1))
+            
 
             # Test set loss
-            test_loss = torch.zeros((1), dtype=dtype, device=device)
-            for step in range(num_steps):
-                test_loss += loss(test_mem[step], test_targets)
+            test_loss = loss(logits, test_targets)
             test_loss_hist.append(test_loss.item())
 
             # Print train/test loss/accuracy
@@ -230,16 +184,16 @@ with torch.no_grad():
     targets = targets.to(device)
 
     # forward pass
-    test_spk, _ = net(data.view(data.size(0), -1))
+    logits = net(data.view(data.size(0), -1))
 
     # calculate total accuracy
-    _, predicted = test_spk.sum(dim=0).max(1)
+    pred_probab = nn.Softmax(dim=1)(logits)
+    pred = pred_probab.argmax(1)
     total += targets.size(0)
-    correct += (predicted == targets).sum().item()
+    correct += (pred == targets).sum().item()
 
 print(f"Total correctly classified test set images: {correct}/{total}")
 
 print(f"Test Set Accuracy: {100 * correct / total:.2f}%")
 
-###TODO: change loss functions, latency encoding,
-# can we implement STDP?
+ 

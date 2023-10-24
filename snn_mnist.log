@@ -1,0 +1,178 @@
+Using device: cuda
+NVIDIA GeForce GTX 1660 Ti with Max-Q Design
+Memory Usage:
+Allocated: 0.0 GB
+Cached:    0.0 GB
+Epoch 0, Iteration 0
+Train Set Loss: 65.35
+Test Set Loss: 62.82
+Train set accuracy for a single minibatch: 7.81%
+Train set deviation for a single minibatch: 26.84%
+Test set accuracy for a single minibatch: 8.20%
+Test set deviation for a single minibatch: 27.44%
+
+
+Epoch 0, Iteration 50
+Train Set Loss: 22.60
+Test Set Loss: 18.70
+Train set accuracy for a single minibatch: 81.25%
+Train set deviation for a single minibatch: 39.03%
+Test set accuracy for a single minibatch: 85.55%
+Test set deviation for a single minibatch: 35.16%
+
+
+Epoch 0, Iteration 100
+Train Set Loss: 15.18
+Test Set Loss: 11.05
+Train set accuracy for a single minibatch: 81.64%
+Train set deviation for a single minibatch: 38.72%
+Test set accuracy for a single minibatch: 87.89%
+Test set deviation for a single minibatch: 32.62%
+
+
+Epoch 0, Iteration 150
+Train Set Loss: 9.92
+Test Set Loss: 9.40
+Train set accuracy for a single minibatch: 90.62%
+Train set deviation for a single minibatch: 29.15%
+Test set accuracy for a single minibatch: 90.62%
+Test set deviation for a single minibatch: 29.15%
+
+
+Epoch 0, Iteration 200
+Train Set Loss: 9.62
+Test Set Loss: 10.44
+Train set accuracy for a single minibatch: 90.23%
+Train set deviation for a single minibatch: 29.68%
+Test set accuracy for a single minibatch: 87.89%
+Test set deviation for a single minibatch: 32.62%
+
+
+Epoch 1, Iteration 250
+Train Set Loss: 48.41
+Test Set Loss: 9.10
+Train set accuracy for a single minibatch: 89.06%
+Train set deviation for a single minibatch: 31.21%
+Test set accuracy for a single minibatch: 86.33%
+Test set deviation for a single minibatch: 34.36%
+
+
+Epoch 1, Iteration 300
+Train Set Loss: 15.31
+Test Set Loss: 7.99
+Train set accuracy for a single minibatch: 89.06%
+Train set deviation for a single minibatch: 31.21%
+Test set accuracy for a single minibatch: 88.67%
+Test set deviation for a single minibatch: 31.69%
+
+
+Epoch 1, Iteration 350
+Train Set Loss: 11.18
+Test Set Loss: 6.09
+Train set accuracy for a single minibatch: 90.23%
+Train set deviation for a single minibatch: 29.68%
+Test set accuracy for a single minibatch: 91.02%
+Test set deviation for a single minibatch: 28.60%
+
+
+Epoch 1, Iteration 400
+Train Set Loss: 9.94
+Test Set Loss: 8.02
+Train set accuracy for a single minibatch: 91.02%
+Train set deviation for a single minibatch: 28.60%
+Test set accuracy for a single minibatch: 89.45%
+Test set deviation for a single minibatch: 30.72%
+
+
+Epoch 1, Iteration 450
+Train Set Loss: 7.89
+Test Set Loss: 6.56
+Train set accuracy for a single minibatch: 90.62%
+Train set deviation for a single minibatch: 29.15%
+Test set accuracy for a single minibatch: 92.19%
+Test set deviation for a single minibatch: 26.84%
+
+
+Epoch 2, Iteration 500
+Train Set Loss: 35.08
+Test Set Loss: 6.84
+Train set accuracy for a single minibatch: 91.02%
+Train set deviation for a single minibatch: 28.60%
+Test set accuracy for a single minibatch: 90.23%
+Test set deviation for a single minibatch: 29.68%
+
+
+Epoch 2, Iteration 550
+Train Set Loss: 11.27
+Test Set Loss: 8.44
+Train set accuracy for a single minibatch: 91.41%
+Train set deviation for a single minibatch: 28.03%
+Test set accuracy for a single minibatch: 89.06%
+Test set deviation for a single minibatch: 31.21%
+
+
+Epoch 2, Iteration 600
+Train Set Loss: 13.23
+Test Set Loss: 6.07
+Train set accuracy for a single minibatch: 91.02%
+Train set deviation for a single minibatch: 28.60%
+Test set accuracy for a single minibatch: 90.23%
+Test set deviation for a single minibatch: 29.68%
+
+
+Epoch 2, Iteration 650
+Train Set Loss: 9.34
+Test Set Loss: 5.25
+Train set accuracy for a single minibatch: 91.80%
+Train set deviation for a single minibatch: 27.44%
+Test set accuracy for a single minibatch: 94.53%
+Test set deviation for a single minibatch: 22.74%
+
+
+Epoch 2, Iteration 700
+Train Set Loss: 8.70
+Test Set Loss: 6.42
+Train set accuracy for a single minibatch: 90.23%
+Train set deviation for a single minibatch: 29.68%
+Test set accuracy for a single minibatch: 91.02%
+Test set deviation for a single minibatch: 28.60%
+
+
+Epoch 3, Iteration 750
+Train Set Loss: 22.16
+Test Set Loss: 5.02
+Train set accuracy for a single minibatch: 89.45%
+Train set deviation for a single minibatch: 30.72%
+Test set accuracy for a single minibatch: 91.80%
+Test set deviation for a single minibatch: 27.44%
+
+
+Epoch 3, Iteration 800
+Train Set Loss: 10.24
+Test Set Loss: 4.96
+Train set accuracy for a single minibatch: 89.84%
+Train set deviation for a single minibatch: 30.21%
+Test set accuracy for a single minibatch: 90.62%
+Test set deviation for a single minibatch: 29.15%
+
+
+Epoch 3, Iteration 850
+Train Set Loss: 9.97
+Test Set Loss: 5.18
+Train set accuracy for a single minibatch: 92.58%
+Train set deviation for a single minibatch: 26.21%
+Test set accuracy for a single minibatch: 90.62%
+Test set deviation for a single minibatch: 29.15%
+
+
+Epoch 3, Iteration 900
+Train Set Loss: 8.94
+Test Set Loss: 6.66
+Train set accuracy for a single minibatch: 93.36%
+Train set deviation for a single minibatch: 24.90%
+Test set accuracy for a single minibatch: 91.02%
+Test set deviation for a single minibatch: 28.60%
+
+
+Total correctly classified test set images: 9052/10000
+Test Set Accuracy: 90.52%
