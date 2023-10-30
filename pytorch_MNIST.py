@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 dtype=torch.float
+torch.manual_seed(734)
 print("Feedforward ANN Trained on MNIST")
 
 # setting device on GPU if available, else CPU
@@ -48,7 +49,7 @@ num_hidden2 = 50
 num_outputs = 10
 
 lr=1e-2 #TODO learning rate does not directly translate from the SNN model due to the iteration steps for producing spikes
-weight_decay=1e-6
+#weight_decay=1e-6
 
 
 class Net(nn.Module):
@@ -102,9 +103,9 @@ def train_printer():
 
 net = Net().to(device)
 loss = nn.CrossEntropyLoss()
-optimiser = torch.optim.SGD(net.parameters(),lr=lr, momentum=0.9, weight_decay=weight_decay)
+optimiser = torch.optim.SGD(net.parameters(),lr=lr, momentum=0.9,) #weight_decay=weight_decay)
 
-num_epochs = 4
+num_epochs = 3
 loss_hist = []
 test_loss_hist = []
 

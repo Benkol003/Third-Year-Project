@@ -1,3 +1,5 @@
+##attempts to implement dropping neuron connections (by zeroing weight matrix elements) over snntorch_MNIST.py
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -60,6 +62,27 @@ lr=5e-5
 
 spike_grad1 = surrogate.atan() 
 
+class WeightDropConnect(nn.Module):
+    def __init__(self,threshold = 1e-06):
+        super().__init__()
+        self.threshold=threshold
+
+    #mask the weights on the forward pass
+    def forward_pre_hook(self,module,args): # -> None or modified input:
+
+        module.weight.data = torch.where(
+            torch.abs(module.weight.data) < self.threshold, 
+            torch.zeros_like(module.weight.data), 
+            module.weight.data)
+        #zero_weights = torch.eq(module.weight.data, 0).sum().item()
+        #print("zero weights: ",zero_weights)
+
+    #mask the gradients on the backward pass
+    def back_hook(self,module,grad_input,grad_output): #-> tuple(nn.Tensor) or None: want a post hook for dropconnect, pre hook for dropout
+        # DO NOT MODIFY INPUT IN-PLACE!
+        return (grad_input) 
+    
+
 class Net(nn.Module):
 
     def __init__(self):
@@ -68,10 +91,12 @@ class Net(nn.Module):
 
 
         # initialize layers
-
+        self.dropper = WeightDropConnect()
         
 
         self.fc1 = nn.Linear(num_inputs, num_hidden1)
+        self.fc1.register_forward_pre_hook(self.dropper.forward_pre_hook)
+        self.fc1.register_full_backward_hook(self.dropper.back_hook)
         self.lif1 = snn.Leaky(beta=beta,spike_grad=spike_grad1)
 
         self.fc2 = nn.Linear(num_hidden1,num_hidden2)
@@ -87,7 +112,8 @@ class Net(nn.Module):
 
         #spike encoding at input layer
         x_spk = spikegen.rate(x,num_steps=num_steps) 
-        # Initialize hidden states
+
+        # Initialize neuron hidden states
         mem1 = self.lif1.init_leaky()
         mem2 = self.lif2.init_leaky()
         mem3 = self.lif2.init_leaky()
@@ -99,18 +125,12 @@ class Net(nn.Module):
         for step in range(num_steps):
             #x = x_spk[step] #for encoded input
 
-            #x = self.dropout(x)
-
             cur1 = self.fc1(x)
             #cur1 = self.fc1(x) #for non-encoded input
             spk1, mem1 = self.lif1(cur1, mem1)
 
-            #mem1 = self.dropout(mem1)
-
             cur2 = self.fc2(spk1)
             spk2, mem2 = self.lif2(cur2, mem2)
-
-            #mem2 = self.dropout(mem2)
 
             cur3 = self.fc3(spk2)
             spk3, mem3 = self.lif3(cur3, mem3)
