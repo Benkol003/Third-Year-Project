@@ -1,8 +1,3 @@
-import torch
-from torch import nn
-
-#TODO dtype and device
-
 class WeightMasker(nn.Module):
 
     #TODO send tensors to CUDA
@@ -21,6 +16,7 @@ class WeightMasker(nn.Module):
             for i in self.linearsList:
                 print("initial zero weights:",torch.sum(i.weight==0).item())
                 weightMask = torch.bernoulli(torch.full_like(i.weight,self.connectivity,dtype=DTYPE,device=device))
+
                 i.weight.data = i.weight * weightMask #hadamard product
                 self.weightSignMasks.append( torch.sign(i.weight) * weightMask)
 

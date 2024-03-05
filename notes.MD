@@ -13,3 +13,9 @@ Not much loss in accuracy
 
 TODO look at DVS gesture
 https://research.ibm.com/interactive/dvsgesture/
+
+DVS 1 (abandoned) - accuracy ~77%
+
+
+DVS2 1200 iter 5e-4 lr - 84% accuracy
+DVS2 1200 iter 1e-4 lr - 85% accuracy
