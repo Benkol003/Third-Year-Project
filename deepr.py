@@ -7,8 +7,6 @@ class DeepR(nn.Module):
     Implementation of the DeepR algorithm.
     '''
 
-    #TODO send tensors to CUDA
-
     def __init__(self, layersList : nn.ModuleList, learnRate: float, layersIndicies : Optional[list] = None,  temp : float = 1e-5, alpha : float = 1e-5, connectivity : float = 0.5, device : Optional[torch.device] = None):
         super().__init__()
 
