@@ -1,5 +1,7 @@
 ### Deep Rewiring in Neural Networks
 
+Please install snnTorch from source! there are useful performance fixes that have not been used yet
+
 Uses the Deepr algorithm from the paper https://arxiv.org/abs/1711.05136.
 
 SNN_MNIST.ipynb - spiking feedforward neural network, spike rate for encoding,decoding,loss, with ATAN surrogate gradient.\\
