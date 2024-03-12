@@ -10,6 +10,29 @@ import os
 
 import matplotlib.pyplot as plt
 
+import numpy as np
+import random
+
+#set seeding
+
+#set seeds
+seed = 115
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+np.random.seed(seed)
+random.seed(seed)
+
+gtrain = torch.Generator()
+gtrain.manual_seed(seed) #need to call this later to reset the generator for reproducibility
+gtest = torch.Generator()
+gtest.manual_seed(seed)
+
+def gen_reset():
+    global gtrain, gtest
+    gtrain.manual_seed(seed)
+    gtest.manual_seed(seed)
+
+
 def test_stats(net : nn.Module,test_loader,iterations = None,device=None):
 
     r"""
@@ -18,8 +41,6 @@ def test_stats(net : nn.Module,test_loader,iterations = None,device=None):
 
     if iterations == None:
         iterations = len(test_loader)
-
-    test_loader = iter(test_loader)
 
     with torch.no_grad():
         net.eval()
@@ -108,7 +129,7 @@ def trainer(net : nn.Module,
 
                     #TODO this shit is replicated
                     #TODO uh should i use one sample or multiple here
-                    valid_data, valid_targets = next(valid_loader)#TODO may need iter
+                    valid_data, valid_targets = next(valid_loader)
                     valid_data=valid_data.to(device)
                     valid_targets=valid_targets.to(device)
                     valid_logits = net(valid_data)

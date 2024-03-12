@@ -4,11 +4,10 @@ Please install snnTorch from source! there are useful performance fixes that hav
 
 deepr.py implements the Deepr algorithm from the paper https://arxiv.org/abs/1711.05136.
 
-torch_MNIST.ipynb - Feedforward neural network with ReLU neurons & cross entropy loss, for comparison with SNN's.  
-torch_MNIST_deepr.ipynb - dynamic rewiring works with good accuracy.  
-SNN_MNIST.ipynb - spiking feedforward neural network, spike rate for encoding,decoding,loss, with ATAN surrogate gradient.  
-SNN_deepr_MNIST.ipynb - good dynamic rewiring, possibly lower connectivity than classical.  
+## TODO
 
-old.SNN_DVS.ipynb - Model for DVSGesture dataset (abandoned due to poor accuracy & high training time)  
+Update to use trainer class and PRNG seeded samplers - SNN deepr, SNN CNN, SNN latency - CNN & latency need deepr equivalents aswell.
 
-SNN_DVS2.ipynb & SNN_DVS2_Deepr.ipynb - training models for DVSGesture dataset, with/without DeepR algorithm used.
+possible merge models & testing for deepr / non-deepr variants into one notebook?
+
+Add F1 score to calculated statistics
