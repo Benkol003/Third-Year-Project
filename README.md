@@ -4,3 +4,5 @@ Please install snnTorch from source! there are useful performance fixes that hav
 
 ### Deep R algorithm
 deepr.py implements the Deepr algorithm from the paper https://arxiv.org/abs/1711.05136.
+
+experiments are done in jupyter notebooks; they are mnemomically named with the type of model, dataset and if using Deep R.

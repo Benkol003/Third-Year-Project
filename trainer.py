@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+#module to perform automatic training and evaluation of models
+
 #set seeding
 
 #set seeds
