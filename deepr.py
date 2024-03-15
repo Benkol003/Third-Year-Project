@@ -3,6 +3,8 @@ import torch.nn as nn
 from typing import Optional
 from numpy.random import multinomial
 
+#TODO autodetection os layer indicies from the layer type - net.parameters(), requires_grad
+
 class DeepR(nn.Module):
     r'''
     Implementation of the DeepR algorithm.

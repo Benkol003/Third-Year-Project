@@ -168,7 +168,10 @@ def trainer(net : nn.Module,
     fig = plt.figure(facecolor="w", figsize=(10, 5))
     plt.plot(loss_hist)
     plt.plot(range(0,iterations,valid_after),valid_loss_hist)
-    plt.title("Loss Curves - "+model_path)
+    if model_path is None:
+        plt.title("Loss Curves")
+    else:
+        plt.title("Loss Curves - "+model_path)
     plt.legend(["Train Loss", "Validation Loss"])
     plt.xlabel("Iteration")
     plt.ylabel("Loss")
