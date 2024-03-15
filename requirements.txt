@@ -1,0 +1,10 @@
+--find-links https://download.pytorch.org/whl/torch_stable.html
+
+numpy
+matplotlib
+torch==2.2.1+cu121
+torchvision==2.2.1+cu121
+torchaudio=0.17.1+cu121
+snntorch #i recommend installing this from github source
+tonic
+tqdm

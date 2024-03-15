@@ -16,7 +16,7 @@ import random
 #set seeding
 
 #set seeds
-seed = 115
+seed = 115115
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 np.random.seed(seed)
@@ -59,7 +59,7 @@ def test_stats(net : nn.Module,test_loader,iterations = None,device=None):
 
             accuracy.append(net.accuracy_metric(logits,targets))
             
-
+    tqdm_bar.close()
     accuracy = sum(accuracy)/len(accuracy)
     print(f"Test Accuracy: {accuracy*100:.2f}%")
     return accuracy
@@ -67,13 +67,14 @@ def test_stats(net : nn.Module,test_loader,iterations = None,device=None):
 def trainer(net : nn.Module, 
             train_loader: DataLoader,
             valid_loader: DataLoader,
-            model_path : str, 
-            lr : float, 
+            optimiser : torch.optim.Optimizer,
+            scheduler : Optional[torch.optim.lr_scheduler.LRScheduler] = None,
             epochs : int = 1, 
             iterations : Optional[int] = None,
-            test_iterations : int = 50, 
-            gradient_accumulation : int = 1, #TDO not implemented yet
-            deepr : bool = False, 
+            valid_after : int = 50,
+            valid_iterations : int = 1,
+            deepr : bool = False,
+            model_path : str = None, 
             device: torch.device = None):
     
     r"""
@@ -83,14 +84,12 @@ def trainer(net : nn.Module,
     """
     
     net  = net.to(device)
-    optimiser = torch.optim.Adam(net.parameters(),lr)
 
     if iterations == None:
         iterations = len(train_loader) * epochs
 
     loss_hist = []
     valid_loss_hist = []
-    valid_count = 0
 
     valid_loader = iter(valid_loader)
 
@@ -112,53 +111,63 @@ def trainer(net : nn.Module,
             logits = net(data)
             loss = net.loss(logits,targets)
 
-            #backward pass TODO grad accumulation
             optimiser.zero_grad()
             loss.backward()
             optimiser.step()
             if deepr:
                 net.deepr.update(device=device)
+            if scheduler is not None:
+                scheduler.step()
 
+            loss_v = loss.item()
             #store train loss history
-            loss_hist.append(loss.item()) #maybe use dict instead to avoid axis scaling
+            loss_hist.append(loss_v) #maybe use dict instead to avoid axis scaling
 
             #Test set evaluation
-            if (iteration)%test_iterations == 0:
+            if (iteration)%valid_after == 0:
                 with torch.no_grad():
                     net.eval()
 
                     #TODO this shit is replicated
                     #TODO uh should i use one sample or multiple here
-                    valid_data, valid_targets = next(valid_loader)
-                    valid_data=valid_data.to(device)
-                    valid_targets=valid_targets.to(device)
-                    valid_logits = net(valid_data)
-                    valid_loss = net.loss(valid_logits,valid_targets)
+                    valid_loss_v = 0.0
+                    valid_accuracy = 0.0
+                    for i in range(valid_iterations):
+                        valid_data, valid_targets = next(valid_loader)
+                        valid_data=valid_data.to(device)
+                        valid_targets=valid_targets.to(device)
+                        valid_logits = net(valid_data)
+                        valid_loss_v += net.loss(valid_logits,valid_targets).item()
+                        valid_accuracy += net.accuracy_metric(valid_logits,valid_targets)
 
-                    valid_loss_hist.append(valid_loss.item())
+                    valid_loss_v/=valid_iterations
+                    valid_accuracy/=valid_iterations
 
+                    valid_loss_hist.append(valid_loss_v)
+                    if scheduler is not None:
+                        tqdm.write(f"LR: {scheduler.get_last_lr()}")
                     tqdm.write(f"Iteration: {iteration}")
-                    tqdm.write(f"Training loss: {loss.item():.2f}")
-                    tqdm.write(f"Validation loss: {valid_loss.item():.2f}")
+                    tqdm.write(f"Training loss: {loss_v:.2f}")
+                    tqdm.write(f"Validation loss: {valid_loss_v:.2f}")
 
-                    valid_acc = net.accuracy_metric(valid_logits,valid_targets)
-                    tqdm.write(f"Validation accuracy: {valid_acc*100:.2f}%")
+                    
+                    tqdm.write(f"Validation accuracy: {valid_accuracy*100:.2f}%")
 
                     acc = net.accuracy_metric(logits,targets)
                     tqdm.write(f"Training accuracy: {acc*100:.2f}%")
                     tqdm.write("----------------")
 
-                    valid_count +=1
-
             iteration +=1
 
-    if os.path.isfile(model_path):
-        os.remove(model_path)
-    torch.save(net.state_dict(),model_path)
+    tqdm_bar.close()
+    if model_path is not None:
+        if os.path.isfile(model_path):
+            os.remove(model_path)
+        torch.save(net.state_dict(),model_path)
 
     fig = plt.figure(facecolor="w", figsize=(10, 5))
     plt.plot(loss_hist)
-    plt.plot(range(0,iterations,test_iterations),valid_loss_hist)
+    plt.plot(range(0,iterations,valid_after),valid_loss_hist)
     plt.title("Loss Curves - "+model_path)
     plt.legend(["Train Loss", "Validation Loss"])
     plt.xlabel("Iteration")

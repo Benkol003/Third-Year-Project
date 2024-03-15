@@ -3,8 +3,6 @@ import torch.nn as nn
 from typing import Optional
 from numpy.random import multinomial
 
-from line_profiler import profile
-
 class DeepR(nn.Module):
     r'''
     Implementation of the DeepR algorithm.
@@ -102,3 +100,22 @@ class DeepR(nn.Module):
             
                 self.layersList[i].weight.data = weights
                 self.weightSignMasks[i] = weightSignMask
+
+
+@torch.no_grad()
+def layer_connection_hist(deepr : DeepR,connectivity : float):
+    r"""
+    plots a histogram of connectivity percentage per-layer in a model.
+    """
+    
+    conn_hist = []
+    for i in deepr.layersIndicies:
+        layer = deepr.layersList[i]
+        conn_hist.append(float( torch.count_nonzero(layer.weight) / torch.numel(layer.weight)) * 100)
+    
+    plt.title(f"Connectivity: {connectivity*100}%")
+    plt.xlabel("Layer Index")
+    plt.ylabel("Accuracy %")
+    plt.bar(deepr.layersIndicies,conn_hist)
+    plt.axhline(y=connectivity*100, color='r', linestyle='--')
+    plt.show()
